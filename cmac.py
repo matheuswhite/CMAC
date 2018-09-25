@@ -78,7 +78,7 @@ class CMAC:
     def __init__(self, offsets: list, dimensions: list, n_tilings: int):
         self.tilings = []
         for x in range(n_tilings):
-            self.tilings.append(BoxTiling(dimensions, offsets))
+            self.tilings.append(BoxTiling(dimensions, offsets[x]))
 
     def get_weight(self, state: State):
         weight = 0

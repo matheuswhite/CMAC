@@ -15,13 +15,21 @@ self.ball_vel_y = int(state['ball_velocity_y'])
 class PongState(State):
 
     def __init__(self, state, action_index):
-        self.ver_distance = abs(int(state['ball_y']) - int(state['player_y']))
-        self.ver_distance_signal = 1 if int(state['ball_y']) - int(state['player_y']) > 0 else 0
-        self.hor_distance = int(state['ball_x'])
-        self.ball_vel_x = 1 if int(state['ball_velocity_y']) > 0 else 0
+        self.ball_y = state['ball_y']
+        self.ball_x = state['ball_x']
+        self.player_y = state['player_y']
+        self.ball_vel_x = state['ball_velocity_x']
         self.action_index = action_index
 
-        super().__init__([self.ver_distance, self.ver_distance_signal, self.hor_distance, self.ball_vel_x, self.action_index])
+        super().__init__([self.ball_y, self.ball_x, self.player_y, self.ball_vel_x, self.action_index])
+
+        # self.ver_distance = abs(int(state['ball_y']) - int(state['player_y']))
+        # self.ver_distance_signal = 1 if int(state['ball_y']) - int(state['player_y']) > 0 else 0
+        # self.hor_distance = int(state['ball_x'])
+        # self.ball_vel_x = 1 if int(state['ball_velocity_y']) > 0 else 0
+        # self.action_index = action_index
+        #
+        # super().__init__([self.ver_distance, self.ver_distance_signal, self.hor_distance, self.ball_vel_x, self.action_index])
 
 
 class PongAgent:
@@ -33,12 +41,16 @@ class PongAgent:
         self.epsilon = epsilon
         self.filename = 'pong_agent_cmac'
 
-        offsets = [8*1, 0, 8*3, 0, 0]
-        dimensions = [Dimension(tile_width=8, minn=0, maxx=48), Dimension(tile_width=1, minn=0, maxx=2),
-                      Dimension(tile_width=8, minn=0, maxx=64), Dimension(tile_width=1, minn=0, maxx=2),
+        unit = 8
+        offsets1 = [unit * randint(1, 8), unit * randint(1, 8), unit * randint(1, 8), unit * randint(1, 8), 0]
+        offsets2 = [unit * randint(1, 8), unit * randint(1, 8), unit * randint(1, 8), unit * randint(1, 8), 0]
+        offsets3 = [unit * randint(1, 8), unit * randint(1, 8), unit * randint(1, 8), unit * randint(1, 8), 0]
+        offsets4 = [unit * randint(1, 8), unit * randint(1, 8), unit * randint(1, 8), unit * randint(1, 8), 0]
+        dimensions = [Dimension(tile_width=unit, minn=0, maxx=64), Dimension(tile_width=unit, minn=0, maxx=64),
+                      Dimension(tile_width=unit, minn=0, maxx=64), Dimension(tile_width=unit, minn=0, maxx=64),
                       Dimension(tile_width=1, minn=0, maxx=3)]
 
-        self.q_func = CMAC(offsets=offsets, dimensions=dimensions, n_tilings=4)
+        self.q_func = CMAC(offsets=[offsets1, offsets2, offsets3, offsets4], dimensions=dimensions, n_tilings=4)
 
         if load_from_file:
             self.q_func.load_from_file(self.filename)
@@ -84,6 +96,7 @@ class PongAgent:
         expected_reward = reward + self.gama*next_q_func
 
         new_weight = now_q_func + self.learning_ratio*(expected_reward - now_q_func)
+        # print(new_weight)
         self.q_func.set_weight(pong_state, new_weight)
 
     def save_to_file(self):
